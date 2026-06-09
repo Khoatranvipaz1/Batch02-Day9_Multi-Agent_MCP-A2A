@@ -19,7 +19,7 @@ Các bạn cần cài đặt trước:
 3. Tạo tài khoản OpenRouter: https://openrouter.ai
 4. Clone repo: git clone <repo-url>
 5. Chạy: cd legal_multiagent && uv sync
-6. Copy .env.example thành .env và thêm OPENROUTER_API_KEY
+6. Tạo file .env và thêm OPENROUTER_API_KEY, OPENROUTER_MODEL, REGISTRY_URL
 
 Test: uv run python stages/stage_1_direct_llm/main.py
 Nếu chạy được là OK!
@@ -353,7 +353,8 @@ uv sync
 **4. LLM response chậm:**
 - Bình thường, có thể mất 30-60s
 - Giải thích: nhiều LLM calls tuần tự
-- Có thể switch sang model nhanh hơn: `OPENROUTER_MODEL=openai/gpt-3.5-turbo`
+- Cấu hình mặc định tiết kiệm cho lab:
+  `OPENROUTER_MODEL=google/gemini-2.5-flash-lite`
 
 ### Điều Chỉnh Thời Gian
 

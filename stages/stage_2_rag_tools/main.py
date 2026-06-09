@@ -15,7 +15,10 @@ from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
 from langchain_core.tools import tool
 
+from common.console import configure_utf8_console
 from common.llm import get_llm
+
+configure_utf8_console()
 
 # ---------------------------------------------------------------------------
 # Simulated legal knowledge base (in production, this would be a vector store)

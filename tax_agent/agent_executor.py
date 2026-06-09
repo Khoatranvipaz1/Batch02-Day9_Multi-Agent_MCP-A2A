@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import time
 from uuid import uuid4
 
 from langchain_core.messages import HumanMessage
@@ -30,6 +31,7 @@ class TaxAgentExecutor(AgentExecutor):
     """Bridges A2A RequestContext to the Tax LangGraph agent."""
 
     async def execute(self, context: RequestContext, event_queue: EventQueue) -> None:
+        started = time.perf_counter()
         # Extract question from message parts
         question = self._extract_question(context)
         context_id = context.context_id or str(uuid4())
@@ -69,9 +71,18 @@ class TaxAgentExecutor(AgentExecutor):
                 name="tax_analysis",
             )
             await updater.complete()
+            logger.info(
+                "TaxAgent completed | trace=%s duration_ms=%.1f",
+                trace_id,
+                (time.perf_counter() - started) * 1000,
+            )
 
         except Exception as exc:
-            logger.exception("TaxAgent execution error: %s", exc)
+            logger.exception(
+                "TaxAgent execution error after %.1f ms: %s",
+                (time.perf_counter() - started) * 1000,
+                exc,
+            )
             await updater.failed(
                 updater.new_agent_message(
                     parts=[Part(root=TextPart(text=f"Tax analysis failed: {exc}"))]

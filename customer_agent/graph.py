@@ -14,7 +14,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from langchain_core.tools import tool
+from langchain_core.tools import BaseTool, tool
 from langgraph.prebuilt import create_react_agent
 
 from common.llm import get_llm
@@ -35,22 +35,19 @@ Always use the `delegate_to_legal_agent` tool for any substantive legal question
 Do not attempt to answer complex legal questions from your own knowledge alone.
 
 Be professional, clear, and make the specialist response accessible to the user.
+Keep the final response under 600 words and avoid repeating the specialist
+response verbatim when a shorter faithful summary is sufficient.
 """
 
 
-def build_graph(trace_id: str, context_id: str, depth: int) -> Any:
-    """Build a create_react_agent graph with trace context bound into the tool closure.
+def create_delegate_tool(
+    trace_id: str,
+    context_id: str,
+    depth: int,
+) -> BaseTool:
+    """Create the legal delegation tool with request trace context."""
 
-    Args:
-        trace_id: UUID generated at this request's entry point.
-        context_id: A2A context_id for this conversation.
-        depth: Delegation depth (0 at customer agent).
-
-    Returns:
-        A compiled LangGraph agent.
-    """
-
-    @tool
+    @tool("delegate_to_legal_agent")
     async def delegate_to_legal_agent(question: str) -> str:
         """Send a legal question to the Law Agent for comprehensive analysis.
 
@@ -87,6 +84,25 @@ def build_graph(trace_id: str, context_id: str, depth: int) -> Any:
             logger.exception("delegate_to_legal_agent failed: %s", exc)
             return f"Could not reach the Law Agent: {exc}"
 
+    return delegate_to_legal_agent
+
+
+def build_graph(trace_id: str, context_id: str, depth: int) -> Any:
+    """Build a create_react_agent graph with trace context bound into its tool.
+
+    Args:
+        trace_id: UUID generated at this request's entry point.
+        context_id: A2A context_id for this conversation.
+        depth: Delegation depth (0 at customer agent).
+
+    Returns:
+        A compiled LangGraph agent.
+    """
+    delegate_to_legal_agent = create_delegate_tool(
+        trace_id=trace_id,
+        context_id=context_id,
+        depth=depth,
+    )
     llm = get_llm()
     graph = create_react_agent(
         model=llm,

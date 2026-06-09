@@ -7,9 +7,8 @@
 # Cài đặt dependencies
 uv sync
 
-# Copy environment file
-cp .env.example .env
-# Sau đó sửa .env, thêm OPENROUTER_API_KEY
+# Tạo và cấu hình file .env
+# Thêm OPENROUTER_API_KEY, OPENROUTER_MODEL và REGISTRY_URL
 ```
 
 ### Chạy Stages (Standalone)
@@ -37,6 +36,29 @@ uv run python test_client.py
 
 # Stop tất cả
 # Ctrl+C trong terminal chạy start_all.sh
+```
+
+### Chạy Stage 5 trên Windows PowerShell
+```powershell
+# Start tất cả services
+.\start_all.ps1
+
+# Test hệ thống ở terminal khác
+.\.venv\Scripts\python.exe test_client.py
+```
+
+### UI Streamlit (Optional)
+```powershell
+uv run streamlit run app.py
+```
+
+### Eval và Cost Offline
+```powershell
+# Không gọi OpenRouter, tự xóa API key khỏi process kiểm thử
+.\run_offline_checks.ps1
+
+# Chỉ estimate cost cho 100 câu hỏi cần cả Tax và Compliance
+uv run python -m evals.cost_estimator --scenario both --queries 100 --max-budget 0.25
 ```
 
 ### Chạy Từng Service Riêng

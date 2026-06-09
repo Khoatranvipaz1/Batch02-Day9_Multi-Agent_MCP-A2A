@@ -49,8 +49,8 @@ uv run python exercises/exercise_4_multiagent.py
 
 ## Hướng Dẫn Làm Bài
 
-### 1. Đọc TODO Comments
-Mỗi file có các comment `# TODO:` chỉ ra chỗ cần điền code.
+### 1. Đọc Implementation
+Hai file exercise đã có implementation hoàn chỉnh để chạy và đối chiếu.
 
 ### 2. Tìm Gợi Ý
 Các comment `# Gợi ý:` cho biết hướng làm.
@@ -110,6 +110,6 @@ Nếu gặp khó khăn:
 1. Đọc lại phần lý thuyết trong `CODELAB.md`
 2. Xem `QUICK_REFERENCE.md` cho syntax
 3. Hỏi bạn bè hoặc giảng viên
-4. Check `SOLUTIONS.md` (last resort!)
+4. Check `SOLUTIONS.md` để đối chiếu implementation
 
 **Chúc bạn làm bài tốt! 💪**

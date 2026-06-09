@@ -6,23 +6,26 @@ sends a message to another A2A agent and returns the text response.
 
 from __future__ import annotations
 
+import asyncio
 import logging
+import time
 from uuid import uuid4
 
 import httpx
 
-from a2a.client import A2AClient
+from a2a.client import ClientConfig, ClientFactory
 from a2a.types import (
     AgentCard,
     Message,
-    MessageSendParams,
     Part,
     Role,
-    SendMessageRequest,
+    Task,
     TextPart,
 )
 
 logger = logging.getLogger(__name__)
+
+A2A_TIMEOUT_SECONDS = 240.0
 
 
 async def delegate(
@@ -44,15 +47,22 @@ async def delegate(
     Returns:
         The agent's text response, or an empty string if none could be extracted.
     """
-    async with httpx.AsyncClient(timeout=300.0) as http_client:
+    started = time.perf_counter()
+    timeout = httpx.Timeout(A2A_TIMEOUT_SECONDS, connect=10.0)
+    async with httpx.AsyncClient(timeout=timeout) as http_client:
         # Fetch agent card
         card_url = f"{endpoint}/.well-known/agent.json"
         card_resp = await http_client.get(card_url)
         card_resp.raise_for_status()
         agent_card = AgentCard.model_validate(card_resp.json())
 
-        # Build deprecated (legacy) A2AClient — straightforward for send_message
-        client = A2AClient(httpx_client=http_client, agent_card=agent_card)
+        client = ClientFactory(
+            ClientConfig(
+                streaming=False,
+                polling=False,
+                httpx_client=http_client,
+            )
+        ).create(agent_card)
 
         # Build message with trace metadata
         message = Message(
@@ -67,24 +77,42 @@ async def delegate(
             },
         )
 
-        request = SendMessageRequest(
-            id=str(uuid4()),
-            params=MessageSendParams(message=message),
-        )
-
-        logger.debug(
+        logger.info(
             "Delegating to %s (depth=%d, trace=%s)", endpoint, depth, trace_id
         )
 
-        response = await client.send_message(request)
+        response: object | None = None
+        try:
+            async with asyncio.timeout(A2A_TIMEOUT_SECONDS):
+                async for event in client.send_message(message):
+                    response = event
+        except TimeoutError as exc:
+            raise TimeoutError(
+                f"A2A request to {endpoint} exceeded "
+                f"{A2A_TIMEOUT_SECONDS:.0f} seconds"
+            ) from exc
 
-        # Extract text from SendMessageResponse
-        return _extract_text(response)
+        text = _extract_text(response)
+        logger.info(
+            "Delegation completed from %s (%d chars, trace=%s, duration_ms=%.1f)",
+            endpoint,
+            len(text),
+            trace_id,
+            (time.perf_counter() - started) * 1000,
+        )
+        return text
 
 
 def _extract_text(response: object) -> str:
     """Walk the response tree and collect all TextPart.text values."""
     text = ""
+
+    if response is None:
+        return text
+
+    # ClientFactory non-streaming responses are (Task, None) tuples.
+    if isinstance(response, tuple):
+        response = response[0]
 
     # Unwrap root if it's a RootModel
     if hasattr(response, "root"):
@@ -92,8 +120,10 @@ def _extract_text(response: object) -> str:
 
     # SendMessageSuccessResponse has a .result (Task | Message)
     result = getattr(response, "result", None)
-    if result is None:
-        return text
+    if result is None and isinstance(response, Task):
+        result = response
+    elif result is None:
+        result = response
 
     # Task — text lives in artifacts
     artifacts = getattr(result, "artifacts", None)

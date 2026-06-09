@@ -31,8 +31,7 @@ cd legal_multiagent
 uv sync
 
 # Cấu hình environment
-cp .env.example .env
-# Sửa file .env, thêm OPENROUTER_API_KEY của bạn
+# Tạo file .env và thêm OPENROUTER_API_KEY của bạn
 ```
 
 ---
@@ -211,7 +210,9 @@ Thêm vào tools list và test với câu hỏi về breach of contract.
 
 **Bài Tập 3.2:** Debug agent reasoning
 
-Thêm `verbose=True` vào `create_react_agent()` để xem chi tiết quá trình suy nghĩ của agent.
+Với LangGraph hiện tại, thêm `debug=True` vào `create_react_agent()` và dùng
+`graph.astream(..., stream_mode="updates")` để quan sát các bước gọi tool và
+kết quả tool. Tham số `verbose=True` không còn thuộc API hiện tại.
 
 ---
 

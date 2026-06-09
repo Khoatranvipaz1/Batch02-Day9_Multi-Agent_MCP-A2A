@@ -118,8 +118,7 @@ cd legal_multiagent
 uv sync
 
 # Configure environment
-cp .env.example .env
-# Edit .env with your OpenRouter API key
+# Create .env and add your OpenRouter API key, model, and registry URL
 ```
 
 ### Run the Full System (Stage 5)
@@ -131,6 +130,70 @@ cp .env.example .env
 # In another terminal, send a test question
 uv run python test_client.py
 ```
+
+On Windows PowerShell:
+
+```powershell
+.\start_all.ps1
+
+# In another terminal
+.\.venv\Scripts\python.exe test_client.py
+```
+
+Optional Streamlit UI, adapted from the Day 8 chat interface:
+
+```powershell
+uv run streamlit run app.py
+```
+
+The UI calls the existing Customer Agent once per submitted message. It does
+not add a separate generation step or duplicate the Day 8 RAG corpus.
+
+### Offline Evaluation and Cost Planning
+
+Run all checks without an OpenRouter request:
+
+```powershell
+.\run_offline_checks.ps1
+```
+
+The script removes API keys from its process, runs deterministic mock-based
+multi-agent evaluations, and writes:
+
+- `artifacts/offline_eval_report.md`
+- `artifacts/offline_eval_report.json`
+- `artifacts/cost_estimate.md`
+- `artifacts/cost_estimate.json`
+
+The offline eval covers routing combinations, delegation depth, Customer to
+Law trace propagation, parallel Tax/Compliance execution, aggregation, and
+specialist failure fallback.
+
+Cost planning can also be run separately:
+
+```powershell
+uv run python -m evals.cost_estimator `
+  --scenario both `
+  --queries 100 `
+  --max-budget 0.25
+```
+
+The current `both` scenario models seven LLM calls per question. Prices are
+planning inputs, not live billing data. Override them when needed:
+
+```powershell
+$env:OPENROUTER_INPUT_PRICE_PER_M="0.10"
+$env:OPENROUTER_OUTPUT_PRICE_PER_M="0.40"
+```
+
+The files in `exercises/` are the individual student assignments. The
+distributed Stage 5 implementation is already provided by the `registry/`,
+`customer_agent/`, `law_agent/`, `tax_agent/`, and `compliance_agent/`
+services and is verified separately with `test_client.py`.
+
+Performance measurements and recommended latency improvements are documented
+in `artifacts/LATENCY_OPTIMIZATION_REPORT.md`. Agent and A2A completion logs
+include `duration_ms` for repeatable benchmark runs.
 
 ### Run Individual Stage Demos
 
@@ -164,7 +227,7 @@ legal_multiagent/
 ├── start_all.sh               # Launches all services in correct order
 ├── test_client.py             # E2E test client
 ├── pyproject.toml             # Dependencies (uv-managed)
-├── .env.example               # Required environment variables
+├── .env                       # Local environment variables (Git-ignored)
 │
 ├── common/                    # Shared utilities
 │   ├── llm.py                 # get_llm() → ChatOpenAI via OpenRouter
@@ -196,10 +259,14 @@ Each agent module follows the same structure:
 | Environment Variable | Description | Default |
 |---|---|---|
 | `OPENROUTER_API_KEY` | Your OpenRouter API key | (required) |
-| `OPENROUTER_MODEL` | Model identifier | `anthropic/claude-sonnet-4-5` |
+| `OPENROUTER_MODEL` | Model identifier | `google/gemini-2.5-flash-lite` |
+| `OPENROUTER_MAX_TOKENS` | Maximum output tokens per LLM call | `700` |
+| `OPENROUTER_TIMEOUT_SECONDS` | Timeout for one LLM call | `90` |
+| `OPENROUTER_TEMPERATURE` | Sampling temperature | `0.3` |
 | `REGISTRY_URL` | Registry service URL | `http://localhost:10000` |
 
-The model is swappable to any OpenRouter-supported model (e.g., `openai/gpt-4o`, `google/gemini-2.0-flash`).
+The model is swappable to any OpenRouter-supported model. This project is
+currently configured for `google/gemini-2.5-flash-lite`.
 
 ## Documentation Diagrams
 

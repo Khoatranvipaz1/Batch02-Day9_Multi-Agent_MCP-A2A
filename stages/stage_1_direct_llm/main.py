@@ -17,9 +17,15 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
 
+from common.console import configure_utf8_console
 from common.llm import get_llm
 
-QUESTION = "What are the legal consequences if a company breaches a non-disclosure agreement?"
+configure_utf8_console()
+
+QUESTION = (
+    "Một công ty đơn phương chấm dứt hợp đồng lao động trái pháp luật "
+    "có thể phải chịu những hậu quả gì?"
+)
 
 
 async def main():

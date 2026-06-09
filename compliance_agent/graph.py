@@ -34,6 +34,7 @@ When answering, be precise about:
 
 Always note that your response is for educational purposes and the user
 should consult a licensed attorney for specific compliance advice.
+Keep the complete response under 300 words.
 """
 
 

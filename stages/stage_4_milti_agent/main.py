@@ -18,7 +18,10 @@ from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.tools import tool
 
+from common.console import configure_utf8_console
 from common.llm import get_llm
+
+configure_utf8_console()
 
 # ---------------------------------------------------------------------------
 # Tools for specialist sub-agents
@@ -100,8 +103,8 @@ def search_compliance_law(query: str) -> str:
 
 from typing import Annotated, TypedDict
 
-from langgraph.constants import Send
 from langgraph.graph import END, StateGraph
+from langgraph.types import Send
 
 
 def _last_wins(a: str, b: str) -> str:
@@ -117,6 +120,15 @@ class LegalState(TypedDict):
     tax_result: Annotated[str, _last_wins]
     compliance_result: Annotated[str, _last_wins]
     final_answer: str
+
+
+def _last_nonempty_message_content(messages: list) -> str:
+    """Return the latest non-empty AI/tool content from an agent run."""
+    for message in reversed(messages):
+        content = getattr(message, "content", "")
+        if isinstance(content, str) and content.strip():
+            return content
+    return ""
 
 
 # ---------------------------------------------------------------------------
@@ -208,7 +220,7 @@ async def call_tax_specialist(state: LegalState) -> dict:
     agent = create_react_agent(model=llm, tools=[search_tax_law], prompt=tax_prompt)
     result = await agent.ainvoke({"messages": [{"role": "user", "content": state["question"]}]})
 
-    final_msg = result["messages"][-1].content
+    final_msg = _last_nonempty_message_content(result["messages"])
     print(f"  [Node: call_tax_specialist] Done ({len(final_msg)} chars)")
     return {"tax_result": final_msg}
 
@@ -230,7 +242,7 @@ async def call_compliance_specialist(state: LegalState) -> dict:
     agent = create_react_agent(model=llm, tools=[search_compliance_law], prompt=compliance_prompt)
     result = await agent.ainvoke({"messages": [{"role": "user", "content": state["question"]}]})
 
-    final_msg = result["messages"][-1].content
+    final_msg = _last_nonempty_message_content(result["messages"])
     print(f"  [Node: call_compliance_specialist] Done ({len(final_msg)} chars)")
     return {"compliance_result": final_msg}
 

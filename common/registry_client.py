@@ -7,6 +7,9 @@ and `register(agent_info)` for agents to self-register on startup.
 import os
 
 import httpx
+from dotenv import load_dotenv
+
+load_dotenv()
 
 REGISTRY_URL = os.getenv("REGISTRY_URL", "http://localhost:10000")
 

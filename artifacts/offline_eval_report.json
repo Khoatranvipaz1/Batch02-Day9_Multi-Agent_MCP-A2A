@@ -1,0 +1,38 @@
+[
+  {
+    "name": "routing_matrix",
+    "passed": true,
+    "duration_ms": 0.19289995543658733,
+    "details": "4 routing combinations passed"
+  },
+  {
+    "name": "depth_guard",
+    "passed": true,
+    "duration_ms": 0.00589998671784997,
+    "details": "max depth skipped routing LLM and specialist delegation"
+  },
+  {
+    "name": "customer_delegation_tool",
+    "passed": true,
+    "duration_ms": 5.52639999659732,
+    "details": "customer tool discovered Law Agent and propagated trace/context/depth"
+  },
+  {
+    "name": "parallel_trace_aggregation",
+    "passed": true,
+    "duration_ms": 44.89970003487542,
+    "details": "parallel overlap=2; trace/context/depth propagated; aggregation passed"
+  },
+  {
+    "name": "specialist_failure_fallback",
+    "passed": true,
+    "duration_ms": 14.378199994098395,
+    "details": "tax failure degraded gracefully; compliance and aggregation completed"
+  },
+  {
+    "name": "cost_model",
+    "passed": true,
+    "duration_ms": 0.08430000161752105,
+    "details": "call counts and positive offline cost estimates passed for 4 scenarios"
+  }
+]
