@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import sys
 
 from Lab_Assignment.supervisor import answer_question
-from common.console import configure_utf8_console
 
 
 DEFAULT_QUESTION = "Luật phòng chống ma túy quy định trách nhiệm của gia đình thế nào?"
@@ -18,6 +18,14 @@ async def main(question: str) -> None:
     print(f"Evidence count: {len(result['evidence'])}")
     print("-" * 60)
     print(result["answer"])
+
+
+def configure_utf8_console() -> None:
+    """Make Vietnamese CLI output reliable on Windows."""
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(encoding="utf-8", errors="replace")
 
 
 if __name__ == "__main__":
