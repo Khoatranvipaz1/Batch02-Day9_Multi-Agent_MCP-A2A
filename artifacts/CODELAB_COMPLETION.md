@@ -34,11 +34,14 @@ Status meanings:
 | Cost planning | Verified offline | Estimator and budget gate |
 | Bonus latency baseline | Verified live | 20.11 seconds |
 | Bonus latency optimization | Verified live | 15.60 seconds; 4.51 seconds faster (22.4%) |
+| `Lab-Solution.md` | Complete | Solutions for lab exercises 1.1-5.3 |
+| Day 8 Supervisor-Workers assignment | Verified offline | 3 workers; 5/5 tests passed |
 
 ## Remaining required checks
 
-The required stages and the latency bonus have been executed successfully.
-The optional Vite/HTML visualization bonus was intentionally not implemented.
+The required stages, latency bonus, `Lab-Solution.md`, and Day 8
+Supervisor-Workers assignment have been completed. The optional Vite/HTML
+visualization bonus was intentionally not implemented.
 
 ## Optional advanced challenges
 
