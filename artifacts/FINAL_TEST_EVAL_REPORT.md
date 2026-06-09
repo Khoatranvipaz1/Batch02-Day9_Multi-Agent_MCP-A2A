@@ -20,6 +20,7 @@
 | Exercise 2 | PASS | 6.42s | `check_statute_of_limitations` called |
 | Exercise 4 Privacy Agent | PASS | 10.80s | Complete four-section response |
 | Stage 5 A2A E2E | PASS | 20.11s | Customer → Law → Tax + Compliance |
+| Stage 5 optimized E2E | PASS | 15.60s | Same four-agent route; three fewer LLM calls |
 | Tax Agent outage | PASS | 20.51s | Tax connection failed; Compliance completed |
 
 ## Distributed Trace Verification
@@ -58,11 +59,11 @@ Result: **6/6, 100%**.
 
 Worst-case planning scenario with both specialists:
 
-- 7 LLM calls per question.
-- 4,500 estimated input tokens.
-- 1,875 estimated output tokens.
-- Approximately $0.0012 per question.
-- Approximately $0.12 per 100 questions.
+- 4 LLM calls per question, reduced from 7.
+- 2,860 estimated input tokens.
+- 1,500 estimated output tokens.
+- Approximately $0.000886 per question.
+- Approximately $0.0886 per 100 questions.
 
 These are offline planning estimates, not live billing totals.
 
@@ -82,8 +83,16 @@ sequential LLM calls: return the Law result directly from Customer and combine
 Law analysis with routing. Short-TTL caching for registry discovery and Agent
 Cards can reduce warm-request network overhead.
 
-Detailed measurements, trade-offs, benchmark procedure, and the estimated
-14-17s optimization target are in `LATENCY_OPTIMIZATION_REPORT.md`.
+The optimization was applied and benchmarked with the same question and model:
+
+- Customer delegates directly to Law, removing its ReAct decision and rewrite.
+- Law uses deterministic domain routing, removing the routing LLM call.
+- Tax and Compliance remain parallel.
+- End-to-end latency improved from **20.11s to 15.60s**.
+- Reduction: **4.51s, or 22.4%**.
+
+Detailed measurements and trade-offs are in
+`LATENCY_OPTIMIZATION_REPORT.md`.
 
 ## Findings Fixed During Testing
 

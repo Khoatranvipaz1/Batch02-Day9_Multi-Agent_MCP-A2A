@@ -9,7 +9,6 @@ Send API so that both sub-agent calls happen concurrently.
 
 from __future__ import annotations
 
-import json
 import logging
 from typing import Annotated, TypedDict
 
@@ -70,48 +69,40 @@ async def analyze_law(state: LawState) -> dict:
 
 
 async def check_routing(state: LawState) -> dict:
-    """Determine whether tax and/or compliance sub-agents are needed.
+    """Route clear specialist topics without another sequential LLM call.
 
-    Returns updated state flags so the routing function can read them.
-    If delegation depth is already at the max, skip further delegation.
+    The Law Agent already has the original question, so keyword routing is
+    sufficient for the codelab domains. Ambiguous regulatory language is routed
+    to Compliance conservatively rather than paying for a separate classifier.
     """
     depth = state.get("delegation_depth", 0)
     if depth >= MAX_DELEGATION_DEPTH:
         logger.info("Max delegation depth reached (%d); skipping sub-agents", depth)
         return {"needs_tax": False, "needs_compliance": False}
 
-    llm = get_llm()
-    messages = [
-        SystemMessage(
-            content=(
-                'You are a legal routing expert. Based on the question, decide whether '
-                'specialist sub-agents are needed.\n'
-                'Reply with ONLY valid JSON — no markdown, no extra text:\n'
-                '{"needs_tax": <true|false>, "needs_compliance": <true|false>}\n\n'
-                'needs_tax = true  → question involves tax law, IRS, tax evasion, penalties\n'
-                'needs_compliance = true → question involves regulatory compliance, SEC, SOX, AML, FCPA'
-            )
-        ),
-        HumanMessage(content=state["question"]),
-    ]
-    result = await llm.ainvoke(messages)
-    raw = result.content.strip()
-
-    # Strip markdown code fences if present
-    if raw.startswith("```"):
-        raw = raw.split("```")[1]
-        if raw.startswith("json"):
-            raw = raw[4:]
-        raw = raw.strip()
-
-    try:
-        parsed = json.loads(raw)
-    except json.JSONDecodeError:
-        logger.warning("Routing LLM returned non-JSON: %r — defaulting to both=True", raw)
-        parsed = {"needs_tax": True, "needs_compliance": True}
-
-    needs_tax = bool(parsed.get("needs_tax", True))
-    needs_compliance = bool(parsed.get("needs_compliance", True))
+    question = state["question"].casefold()
+    tax_keywords = (
+        "tax",
+        "irs",
+        "revenue service",
+        "fbar",
+        "fatca",
+        "thuế",
+    )
+    compliance_keywords = (
+        "compliance",
+        "regulatory",
+        "regulation",
+        "regulator",
+        "sec",
+        "sox",
+        "aml",
+        "fcpa",
+        "anti-money laundering",
+        "tuân thủ",
+    )
+    needs_tax = any(keyword in question for keyword in tax_keywords)
+    needs_compliance = any(keyword in question for keyword in compliance_keywords)
     logger.info("Routing decision: needs_tax=%s needs_compliance=%s", needs_tax, needs_compliance)
     return {"needs_tax": needs_tax, "needs_compliance": needs_compliance}
 

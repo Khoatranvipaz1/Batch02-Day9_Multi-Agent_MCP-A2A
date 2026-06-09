@@ -32,18 +32,12 @@ class EvalResult:
 class ScriptedLLM:
     """Return deterministic responses based on the active system prompt."""
 
-    def __init__(
-        self,
-        routing_json: str = '{"needs_tax": true, "needs_compliance": true}',
-    ) -> None:
-        self.routing_json = routing_json
+    def __init__(self) -> None:
         self.calls: list[str] = []
 
     async def ainvoke(self, messages: list) -> SimpleNamespace:
         system = str(messages[0].content)
         self.calls.append(system)
-        if "routing expert" in system:
-            return SimpleNamespace(content=self.routing_json)
         if "synthesising specialist analyses" in system:
             content = str(messages[-1].content)
             return SimpleNamespace(content=f"AGGREGATED\n{content}")
@@ -82,47 +76,34 @@ def _base_state(depth: int = 1) -> dict:
 
 async def eval_routing_matrix() -> str:
     cases = [
-        ('{"needs_tax": false, "needs_compliance": false}', []),
-        ('{"needs_tax": true, "needs_compliance": false}', ["call_tax"]),
-        ('{"needs_tax": false, "needs_compliance": true}', ["call_compliance"]),
+        ("A company breached a supply contract", []),
+        ("The company committed tax evasion", ["call_tax"]),
+        ("The SEC opened a regulatory investigation", ["call_compliance"]),
         (
-            '{"needs_tax": true, "needs_compliance": true}',
+            "IRS tax penalties and AML compliance failures",
             ["call_compliance", "call_tax"],
         ),
     ]
-    original_get_llm = law_graph.get_llm
-    try:
-        for routing_json, expected in cases:
-            law_graph.get_llm = lambda value=routing_json: ScriptedLLM(value)
-            state = _base_state()
-            update = await law_graph.check_routing(state)
-            state.update(update)
-            destinations = sorted(
-                send.node
-                for send in law_graph.route_to_subagents(state)
-                if send.node != "aggregate"
-            )
-            assert destinations == expected, (routing_json, destinations, expected)
-        return f"{len(cases)} routing combinations passed"
-    finally:
-        law_graph.get_llm = original_get_llm
+    for question, expected in cases:
+        state = _base_state()
+        state["question"] = question
+        update = await law_graph.check_routing(state)
+        state.update(update)
+        destinations = sorted(
+            send.node
+            for send in law_graph.route_to_subagents(state)
+            if send.node != "aggregate"
+        )
+        assert destinations == expected, (question, destinations, expected)
+    return f"{len(cases)} deterministic routing combinations passed"
 
 
 async def eval_depth_guard() -> str:
-    original_get_llm = law_graph.get_llm
-
-    def forbidden_llm():
-        raise AssertionError("LLM must not be created at max delegation depth")
-
-    try:
-        law_graph.get_llm = forbidden_llm
-        update = await law_graph.check_routing(
-            _base_state(depth=law_graph.MAX_DELEGATION_DEPTH)
-        )
-        assert update == {"needs_tax": False, "needs_compliance": False}
-        return "max depth skipped routing LLM and specialist delegation"
-    finally:
-        law_graph.get_llm = original_get_llm
+    update = await law_graph.check_routing(
+        _base_state(depth=law_graph.MAX_DELEGATION_DEPTH)
+    )
+    assert update == {"needs_tax": False, "needs_compliance": False}
+    return "max depth skipped specialist delegation"
 
 
 async def eval_parallel_trace_and_aggregation() -> str:
@@ -277,10 +258,10 @@ async def eval_specialist_failure_fallback() -> str:
 
 async def eval_cost_model() -> str:
     expected_calls = {
-        "legal": 5,
-        "tax": 6,
-        "compliance": 6,
-        "both": 7,
+        "legal": 2,
+        "tax": 3,
+        "compliance": 3,
+        "both": 4,
     }
     for scenario, call_count in expected_calls.items():
         estimate = estimate_cost(scenario=scenario, queries=10)

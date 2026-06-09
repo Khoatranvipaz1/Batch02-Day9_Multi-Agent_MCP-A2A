@@ -1,4 +1,4 @@
-"""Customer Agent — AgentExecutor bridge between A2A SDK and LangGraph."""
+"""Customer Agent — thin A2A gateway to the Law Agent."""
 
 from __future__ import annotations
 
@@ -6,14 +6,12 @@ import logging
 import time
 from uuid import uuid4
 
-from langchain_core.messages import HumanMessage
-
 from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events import EventQueue
 from a2a.server.tasks import TaskUpdater
 from a2a.types import Part, TextPart
 
-from customer_agent.graph import build_graph
+from customer_agent.graph import create_delegate_tool
 
 logger = logging.getLogger(__name__)
 
@@ -42,36 +40,16 @@ class CustomerAgentExecutor(AgentExecutor):
         await updater.start_work()
 
         try:
-            # Build a per-request graph so the tool closure captures this request's IDs
-            graph = build_graph(
+            # The Customer Agent is a transport gateway. Avoiding a ReAct round-trip
+            # removes two sequential LLM calls while preserving A2A delegation.
+            delegate_to_legal_agent = create_delegate_tool(
                 trace_id=trace_id,
                 context_id=context_id,
                 depth=depth,
             )
-
-            result = await graph.ainvoke(
-                {"messages": [HumanMessage(content=question)]},
-                config={"configurable": {"thread_id": context_id}},
+            answer = await delegate_to_legal_agent.ainvoke(
+                {"question": question}
             )
-
-            # Extract the last AI message from the result
-            answer = ""
-            for msg in reversed(result.get("messages", [])):
-                if hasattr(msg, "content") and msg.content:
-                    if not isinstance(msg, HumanMessage):
-                        # Skip ToolMessages, only want final AIMessage
-                        from langchain_core.messages import AIMessage
-                        if isinstance(msg, AIMessage):
-                            answer = msg.content
-                            break
-
-            if not answer:
-                # Fallback: any non-human message content
-                for msg in reversed(result.get("messages", [])):
-                    content = getattr(msg, "content", "")
-                    if content and not isinstance(msg, HumanMessage):
-                        answer = content
-                        break
 
             if not answer:
                 answer = "I was unable to process your legal question at this time."

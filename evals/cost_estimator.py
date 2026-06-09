@@ -75,22 +75,10 @@ def build_call_plan(scenario: str, question_tokens: int = 40) -> list[CallEstima
 
     calls = [
         CallEstimate(
-            agent="customer",
-            purpose="decide and call delegate_to_legal_agent",
-            input_tokens=430 + question_tokens,
-            output_tokens=50,
-        ),
-        CallEstimate(
             agent="law",
             purpose="general legal analysis",
             input_tokens=150 + question_tokens,
             output_tokens=350,
-        ),
-        CallEstimate(
-            agent="law",
-            purpose="route to specialist agents",
-            input_tokens=180 + question_tokens,
-            output_tokens=25,
         ),
     ]
 
@@ -117,21 +105,13 @@ def build_call_plan(scenario: str, question_tokens: int = 40) -> list[CallEstima
         )
         specialist_output_tokens += 350
 
-    calls.extend(
-        [
-            CallEstimate(
-                agent="law",
-                purpose="aggregate legal and specialist analyses",
-                input_tokens=650 + 350 + specialist_output_tokens,
-                output_tokens=450,
-            ),
-            CallEstimate(
-                agent="customer",
-                purpose="present the delegated answer",
-                input_tokens=500 + 450,
-                output_tokens=300,
-            ),
-        ]
+    calls.append(
+        CallEstimate(
+            agent="law",
+            purpose="aggregate legal and specialist analyses",
+            input_tokens=650 + 350 + specialist_output_tokens,
+            output_tokens=450,
+        )
     )
     return calls
 

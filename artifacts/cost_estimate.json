@@ -2,31 +2,19 @@
   "model": "google/gemini-2.5-flash-lite",
   "scenario": "both",
   "queries": 100,
-  "llm_calls_per_query": 7,
-  "input_tokens_per_query": 4500,
-  "output_tokens_per_query": 1875,
+  "llm_calls_per_query": 4,
+  "input_tokens_per_query": 2860,
+  "output_tokens_per_query": 1500,
   "input_price_per_m": 0.1,
   "output_price_per_m": 0.4,
-  "estimated_cost_per_query_usd": 0.0012,
-  "estimated_total_cost_usd": 0.12,
+  "estimated_cost_per_query_usd": 0.000886,
+  "estimated_total_cost_usd": 0.0886,
   "calls": [
-    {
-      "agent": "customer",
-      "purpose": "decide and call delegate_to_legal_agent",
-      "input_tokens": 470,
-      "output_tokens": 50
-    },
     {
       "agent": "law",
       "purpose": "general legal analysis",
       "input_tokens": 190,
       "output_tokens": 350
-    },
-    {
-      "agent": "law",
-      "purpose": "route to specialist agents",
-      "input_tokens": 220,
-      "output_tokens": 25
     },
     {
       "agent": "tax",
@@ -45,12 +33,6 @@
       "purpose": "aggregate legal and specialist analyses",
       "input_tokens": 1700,
       "output_tokens": 450
-    },
-    {
-      "agent": "customer",
-      "purpose": "present the delegated answer",
-      "input_tokens": 950,
-      "output_tokens": 300
     }
   ]
 }

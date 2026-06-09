@@ -30,7 +30,7 @@ All agent discovery is dynamic — agents register their capabilities with the *
 
 | Agent | Port | LangGraph Pattern | Role |
 |---|---|---|---|
-| Customer Agent | 10100 | `create_react_agent` | Entry point — routes user questions to Law Agent |
+| Customer Agent | 10100 | Direct A2A gateway | Entry point — forwards user questions to Law Agent without an extra LLM call |
 | Law Agent | 10101 | Custom `StateGraph` | Orchestrator — analyses law, delegates in parallel |
 | Tax Agent | 10102 | `create_react_agent` | Specialist — tax law, IRS, penalties, FBAR/FATCA |
 | Compliance Agent | 10103 | `create_react_agent` | Specialist — SEC, SOX, FCPA, GDPR, AML |
@@ -178,7 +178,7 @@ uv run python -m evals.cost_estimator `
   --max-budget 0.25
 ```
 
-The current `both` scenario models seven LLM calls per question. Prices are
+The optimized `both` scenario models four LLM calls per question. Prices are
 planning inputs, not live billing data. Override them when needed:
 
 ```powershell
@@ -191,9 +191,9 @@ distributed Stage 5 implementation is already provided by the `registry/`,
 `customer_agent/`, `law_agent/`, `tax_agent/`, and `compliance_agent/`
 services and is verified separately with `test_client.py`.
 
-Performance measurements and recommended latency improvements are documented
-in `artifacts/LATENCY_OPTIMIZATION_REPORT.md`. Agent and A2A completion logs
-include `duration_ms` for repeatable benchmark runs.
+The applied latency optimization and before/after measurements are documented
+in `artifacts/LATENCY_OPTIMIZATION_REPORT.md`. The live E2E result improved
+from 20.11s to 15.60s. Agent and A2A completion logs include `duration_ms`.
 
 ### Run Individual Stage Demos
 

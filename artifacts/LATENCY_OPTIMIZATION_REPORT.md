@@ -50,11 +50,42 @@ an Agent Card for every delegation add smaller network overhead.
 
 ## Practical Target
 
-The current measured baseline is **20.11s**. Removing the Customer rewrite and
-one Law routing call should remove two sequential LLM calls. A conservative
-target for the same workload is **14-17s** end to end. Caching discovery/card
-metadata can improve warm requests further. This is an estimate and must be
-verified with at least 5 live runs; report median and P95 rather than one run.
+The optimization was applied without removing any of the four agents:
+
+1. Customer now delegates directly to Law and returns the Law response. This
+   removes the Customer ReAct decision call and final rewrite call.
+2. Law routes clear Tax and Compliance topics with deterministic keywords.
+   This removes the separate routing LLM call.
+3. Tax and Compliance continue to execute in parallel.
+
+The worst-case call graph decreased from **7 to 4 LLM calls**.
+
+## Live Result After Optimization
+
+The same question, model, token limits, and four-agent route were used.
+
+| Metric | Baseline | Optimized | Improvement |
+|---|---:|---:|---:|
+| End-to-end latency | 20.11s | 15.60s | 4.51s faster |
+| Percentage reduction | - | - | 22.4% |
+| LLM calls | 7 | 4 | 3 fewer |
+| Estimated cost/query | $0.001200 | $0.000886 | 26.2% lower |
+
+Optimized trace: `a603d63c-25ea-4732-9da5-d743ce3f67b3`.
+
+| Component | Optimized duration |
+|---|---:|
+| Customer Agent | 13.57s |
+| Customer to Law delegation | 12.95s |
+| Law Agent | 12.35s |
+| Tax Agent | 4.02s |
+| Compliance Agent | 3.45s |
+
+Tax and Compliance still overlapped. Their critical-path contribution was
+about 4.02s, not the sum of both durations.
+
+This is a one-run demonstration as requested by the bonus. A production
+performance claim should use at least five warm runs and report median/P95.
 
 ## Benchmark Procedure
 
@@ -64,4 +95,4 @@ verified with at least 5 live runs; report median and P95 rather than one run.
 4. Calculate median, minimum, maximum, and P95.
 5. Compare with the 20.11s baseline using the same model and token limits.
 
-No additional OpenRouter request was made to produce this report.
+One optimized OpenRouter E2E request was made to produce the live result.

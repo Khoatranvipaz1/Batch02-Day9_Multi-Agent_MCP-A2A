@@ -32,11 +32,13 @@ Status meanings:
 | E2E test | Verified live | Successful response returned |
 | Offline evaluation | Verified offline | 6/6 checks passed |
 | Cost planning | Verified offline | Estimator and budget gate |
+| Bonus latency baseline | Verified live | 20.11 seconds |
+| Bonus latency optimization | Verified live | 15.60 seconds; 4.51 seconds faster (22.4%) |
 
 ## Remaining required checks
 
-None. All five stages, both individual exercises, normal distributed E2E, and
-the live Tax Agent outage procedure have been executed successfully.
+The required stages and the latency bonus have been executed successfully.
+The optional Vite/HTML visualization bonus was intentionally not implemented.
 
 ## Optional advanced challenges
 

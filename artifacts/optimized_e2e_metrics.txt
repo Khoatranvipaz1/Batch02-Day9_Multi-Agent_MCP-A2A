@@ -1,0 +1,9 @@
+exit_code=0
+elapsed_seconds=15.60
+baseline_seconds=20.11
+reduction_seconds=4.51
+reduction_percent=22.4
+llm_calls_before=7
+llm_calls_after=4
+trace_id=a603d63c-25ea-4732-9da5-d743ce3f67b3
+timestamp=2026-06-09T16:33:03+07:00
