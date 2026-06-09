@@ -6,7 +6,7 @@ import argparse
 import asyncio
 import sys
 
-from Lab_Assignment.supervisor import answer_question
+from lab_assignment.supervisor import answer_question
 
 
 DEFAULT_QUESTION = "Luật phòng chống ma túy quy định trách nhiệm của gia đình thế nào?"

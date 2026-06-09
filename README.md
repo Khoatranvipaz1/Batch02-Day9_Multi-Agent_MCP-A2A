@@ -198,14 +198,14 @@ from 20.11s to 15.60s. Agent and A2A completion logs include `duration_ms`.
 ### Lab Deliverables
 
 - `Lab-Solution.md`: lời giải các bài lab 1.1 đến 5.3 và bonus latency.
-- `Lab_Assignment/`: cải tiến Day 8 RAG Agent bằng Supervisor-Workers với
+- `lab_assignment/`: cải tiến Day 8 RAG Agent bằng Supervisor-Workers với
   Semantic, Lexical và Citation workers.
 
 Run the Day 8 improvement without an API call:
 
 ```powershell
-.\.venv\Scripts\python.exe -m Lab_Assignment.main
-.\.venv\Scripts\python.exe -m unittest Lab_Assignment.test_supervisor -v
+.\.venv\Scripts\python.exe -m lab_assignment.main
+.\.venv\Scripts\python.exe -m unittest lab_assignment.test_supervisor -v
 ```
 
 ### Run Individual Stage Demos

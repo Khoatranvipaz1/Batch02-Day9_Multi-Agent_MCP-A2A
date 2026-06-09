@@ -6,8 +6,8 @@ import asyncio
 import unittest
 from unittest.mock import patch
 
-import Lab_Assignment.supervisor as supervisor
-from Lab_Assignment.workers import citation_worker, lexical_worker, semantic_worker
+import lab_assignment.supervisor as supervisor
+from lab_assignment.workers import citation_worker, lexical_worker, semantic_worker
 
 
 class SupervisorWorkersTest(unittest.IsolatedAsyncioTestCase):

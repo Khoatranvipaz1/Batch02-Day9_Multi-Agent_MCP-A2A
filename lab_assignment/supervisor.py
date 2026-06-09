@@ -8,7 +8,7 @@ from typing import Annotated, TypedDict
 from langgraph.constants import Send
 from langgraph.graph import END, StateGraph
 
-from Lab_Assignment.workers import (
+from lab_assignment.workers import (
     Evidence,
     citation_worker,
     lexical_worker,

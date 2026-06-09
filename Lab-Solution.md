@@ -121,7 +121,7 @@ Chi tiết: `artifacts/LATENCY_OPTIMIZATION_REPORT.md`.
 
 ## 7. Assignment - Improve Day 8
 
-Folder `Lab_Assignment/` cải tiến RAG Agent Day 8 bằng pattern
+Folder `lab_assignment/` cải tiến RAG Agent Day 8 bằng pattern
 **Supervisor-Workers**:
 
 - Supervisor phân công retrieval.
@@ -130,7 +130,7 @@ Folder `Lab_Assignment/` cải tiến RAG Agent Day 8 bằng pattern
 - Citation Worker fusion, rerank và tạo câu trả lời có nguồn.
 
 Hai retrieval workers chạy song song. Toàn bộ code, corpus mẫu, test và hướng
-dẫn chạy đều nằm trong `Lab_Assignment/`.
+dẫn chạy đều nằm trong `lab_assignment/`.
 
 ## 8. Verification
 
@@ -138,7 +138,7 @@ Không gọi API:
 
 ```powershell
 .\run_offline_checks.ps1
-.\.venv\Scripts\python.exe -m unittest Lab_Assignment.test_supervisor -v
+.\.venv\Scripts\python.exe -m unittest lab_assignment.test_supervisor -v
 ```
 
 Live Stage 5 đã được kiểm tra với model

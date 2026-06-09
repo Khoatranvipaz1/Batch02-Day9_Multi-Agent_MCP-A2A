@@ -16,7 +16,7 @@ try {
         throw "Offline multi-agent evaluation failed."
     }
 
-    & $python -m unittest Lab_Assignment.test_supervisor -v
+    & $python -m unittest lab_assignment.test_supervisor -v
     if ($LASTEXITCODE -ne 0) {
         throw "Day 8 Supervisor-Workers evaluation failed."
     }

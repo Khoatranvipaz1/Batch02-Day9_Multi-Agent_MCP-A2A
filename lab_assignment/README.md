@@ -46,19 +46,19 @@ Worker chỉ chạy sau khi cả hai branch hoàn thành.
 Từ root Day 9:
 
 ```powershell
-.\.venv\Scripts\python.exe -m Lab_Assignment.main
+.\.venv\Scripts\python.exe -m lab_assignment.main
 ```
 
 Đặt câu hỏi khác:
 
 ```powershell
-.\.venv\Scripts\python.exe -m Lab_Assignment.main "Tàng trữ ma túy bị xử lý thế nào?"
+.\.venv\Scripts\python.exe -m lab_assignment.main "Tàng trữ ma túy bị xử lý thế nào?"
 ```
 
 ## Chạy test
 
 ```powershell
-.\.venv\Scripts\python.exe -m unittest Lab_Assignment.test_supervisor -v
+.\.venv\Scripts\python.exe -m unittest lab_assignment.test_supervisor -v
 ```
 
 Tests không gọi OpenRouter và kiểm tra:
