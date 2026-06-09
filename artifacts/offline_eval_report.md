@@ -9,7 +9,7 @@
 |---|---|---:|---|
 | routing_matrix | PASS | 0.2 | 4 routing combinations passed |
 | depth_guard | PASS | 0.0 | max depth skipped routing LLM and specialist delegation |
-| customer_delegation_tool | PASS | 5.5 | customer tool discovered Law Agent and propagated trace/context/depth |
-| parallel_trace_aggregation | PASS | 44.9 | parallel overlap=2; trace/context/depth propagated; aggregation passed |
-| specialist_failure_fallback | PASS | 14.4 | tax failure degraded gracefully; compliance and aggregation completed |
+| customer_delegation_tool | PASS | 5.4 | customer tool discovered Law Agent and propagated trace/context/depth |
+| parallel_trace_aggregation | PASS | 40.6 | parallel overlap=2; trace/context/depth propagated; aggregation passed |
+| specialist_failure_fallback | PASS | 15.6 | tax failure degraded gracefully; compliance and aggregation completed |
 | cost_model | PASS | 0.1 | call counts and positive offline cost estimates passed for 4 scenarios |
